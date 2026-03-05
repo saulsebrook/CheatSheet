@@ -1,1 +1,392 @@
+HAL
+
+# HAL Quick Reference Guide
+
+## GPIO Functions
+
+### Pin Configuration
+```cpp
+GPIO_InitTypeDef GPIO_InitStruct = {0};
+GPIO_InitStruct.Pin = GPIO_PIN_5;
+GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;  // or INPUT, OUTPUT_OD, AF_PP, ANALOG
+GPIO_InitStruct.Pull = GPIO_NOPULL;          // or PULLUP, PULLDOWN
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+// INPUT MODES
+GPIO_MODE_INPUT              // Digital input, high impedance
+// Example: Reading a button, switch, or digital sensor
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_PULLUP;  // Use pullup for buttons
+
+GPIO_MODE_ANALOG             // Analog input for ADC
+// Example: Reading temperature sensor, potentiometer
+GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+GPIO_InitStruct.Pull = GPIO_NOPULL;  // No pull resistors in analog mode
+
+// OUTPUT MODES
+GPIO_MODE_OUTPUT_PP          // Push-pull output (can source and sink current)
+// Example: Driving LEDs, controlling relays, most general outputs
+// Can output both HIGH (3.3V) and LOW (0V) strongly
+GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+
+GPIO_MODE_OUTPUT_OD          // Open-drain output (can only sink current)
+// Example: I2C communication, interfacing with 5V devices
+// Can only pull LOW, needs external pullup for HIGH
+// Used when multiple devices share a line (wired-AND)
+GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+GPIO_InitStruct.Pull = GPIO_PULLUP;  // Usually needs pullup
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
+
+// ALTERNATE FUNCTION MODES
+GPIO_MODE_AF_PP              // Alternate function push-pull
+// Example: UART TX, SPI MOSI/MISO/SCK, PWM output
+// Pin controlled by peripheral (UART, SPI, TIM, etc.)
+GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+GPIO_InitStruct.Alternate = GPIO_AF7_USART1;  // Specify which function
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+
+GPIO_MODE_AF_OD              // Alternate function open-drain
+// Example: I2C SDA/SCL pins
+// Peripheral controls pin in open-drain mode
+GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
+GPIO_InitStruct.Pull = GPIO_PULLUP;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+
+// INTERRUPT MODES
+GPIO_MODE_IT_RISING          // Interrupt on rising edge (LOW to HIGH)
+// Example: Button press detection, pulse counting
+GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+GPIO_InitStruct.Pull = GPIO_PULLDOWN;  // Start LOW, trigger on HIGH
+
+GPIO_MODE_IT_FALLING         // Interrupt on falling edge (HIGH to LOW)
+// Example: Button release, timeout detection
+GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+GPIO_InitStruct.Pull = GPIO_PULLUP;  // Start HIGH, trigger on LOW
+
+GPIO_MODE_IT_RISING_FALLING  // Interrupt on both edges
+// Example: Detecting any change, edge counting, frequency measurement
+GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+
+// EVENT MODES (similar to interrupt but doesn't invoke ISR)
+GPIO_MODE_EVT_RISING         // Event on rising edge
+GPIO_MODE_EVT_FALLING        // Event on falling edge
+GPIO_MODE_EVT_RISING_FALLING // Event on both edges
+
+GPIO_NOPULL                  // No pull-up or pull-down
+// Example: When external pullup/pulldown exists, analog pins
+// Pin floats when not driven - can pick up noise
+
+GPIO_PULLUP                  // Enable internal pull-up (~40kΩ)
+// Example: Buttons (active-low), I2C lines, open-drain outputs
+// Pin reads HIGH when nothing connected
+// When button pressed (connects to GND), pin reads LOW
+GPIO_InitStruct.Pull = GPIO_PULLUP;
+
+GPIO_PULLDOWN                // Enable internal pull-down (~40kΩ)
+// Example: Buttons (active-high), ensuring known LOW state
+// Pin reads LOW when nothing connected
+// When button pressed (connects to VCC), pin reads HIGH
+GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+
+GPIO_SPEED_FREQ_LOW          // Low speed (2 MHz typical)
+// Example: LEDs, slow sensors, buttons
+// Lower speed = lower EMI, lower power consumption
+
+GPIO_SPEED_FREQ_MEDIUM       // Medium speed (25 MHz typical)
+// Example: I2C, UART at moderate baud rates
+
+GPIO_SPEED_FREQ_HIGH         // High speed (50 MHz typical)
+// Example: SPI, fast UART, high-speed protocols
+
+GPIO_SPEED_FREQ_VERY_HIGH    // Very high speed (100+ MHz typical)
+// Example: High-speed SPI, memory interfaces, fast clocks
+// Higher speed = faster edges, more EMI, more power
+
+// LED Output (most common)
+GPIO_InitStruct.Pin = GPIO_PIN_13;
+GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+// Button Input (active-low with pullup)
+GPIO_InitStruct.Pin = GPIO_PIN_0;
+GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+GPIO_InitStruct.Pull = GPIO_PULLUP;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+// Button with Interrupt (detect press)
+GPIO_InitStruct.Pin = GPIO_PIN_0;
+GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;  // Trigger when pressed
+GPIO_InitStruct.Pull = GPIO_PULLUP;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+HAL_NVIC_EnableIRQ(EXTI0_IRQn);  // Enable interrupt
+
+// UART TX Pin (alternate function)
+GPIO_InitStruct.Pin = GPIO_PIN_9;
+GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+// I2C SDA Pin (alternate function, open-drain)
+GPIO_InitStruct.Pin = GPIO_PIN_7;
+GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+GPIO_InitStruct.Pull = GPIO_PULLUP;  // I2C requires pullups
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
+HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+// ADC Input (analog mode)
+GPIO_InitStruct.Pin = GPIO_PIN_0;
+GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+// Open-Drain Output (for level shifting to 5V)
+GPIO_InitStruct.Pin = GPIO_PIN_8;
+GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+GPIO_InitStruct.Pull = GPIO_PULLUP;  // Or external 10kΩ to 5V
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+// PWM Output (timer alternate function)
+GPIO_InitStruct.Pin = GPIO_PIN_6;
+GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
+HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+
+
+Read/Write Pins
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);    // HIGH
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);  // LOW
+HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);                 // Flip state
+
+GPIO_PinState state = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+if (state == GPIO_PIN_SET) { /* pin is HIGH */ }
+
+UART Functions
+Init
+UART_HandleTypeDef huart1;
+huart1.Instance = USART1;
+huart1.Init.BaudRate = 115200;
+huart1.Init.WordLength = UART_WORDLENGTH_8B;
+huart1.Init.StopBits = UART_STOPBITS_1;
+huart1.Init.Parity = UART_PARITY_NONE;
+huart1.Init.Mode = UART_MODE_TX_RX;
+HAL_UART_Init(&huart1);
+
+Transmit/Receive
+// Send
+uint8_t data[] = "Hello";
+HAL_UART_Transmit(&huart1, data, sizeof(data), 1000);
+
+// Receive (blocking)
+uint8_t rxBuffer[100];
+HAL_UART_Receive(&huart1, rxBuffer, 10, 5000);
+
+// Receive with interrupt
+HAL_UART_Receive_IT(&huart1, rxBuffer, 10);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    // Data received
+}
+
+I2C Functions
+Init
+I2C_HandleTypeDef hi2c1;
+hi2c1.Instance = I2C1;
+hi2c1.Init.ClockSpeed = 100000;  // 100kHz standard, 400000 fast
+hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+HAL_I2C_Init(&hi2c1);
+
+Master Transmit/Receive
+uint16_t devAddr = 0x76 << 1;  // Device address shifted
+
+// Send data
+uint8_t txData[] = {0x01, 0x02};
+HAL_I2C_Master_Transmit(&hi2c1, devAddr, txData, 2, 1000);
+
+// Receive data
+uint8_t rxData[10];
+HAL_I2C_Master_Receive(&hi2c1, devAddr, rxData, 10, 1000);
+
+// Check if device present
+if (HAL_I2C_IsDeviceReady(&hi2c1, devAddr, 3, 1000) == HAL_OK) {
+    // Device found
+}
+
+Memory Operations (Registers)
+// Write to register
+uint16_t regAddr = 0xF4;
+uint8_t data = 0x27;
+HAL_I2C_Mem_Write(&hi2c1, devAddr, regAddr, 1, &data, 1, 1000);
+
+// Read from register
+uint8_t regValue;
+HAL_I2C_Mem_Read(&hi2c1, devAddr, regAddr, 1, &regValue, 1, 1000);
+
+// Read multiple bytes
+uint8_t tempData[3];
+HAL_I2C_Mem_Read(&hi2c1, devAddr, 0xFA, 1, tempData, 3, 1000);
+
+SPI Functions
+Init
+SPI_HandleTypeDef hspi1;
+hspi1.Instance = SPI1;
+hspi1.Init.Mode = SPI_MODE_MASTER;
+hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+hspi1.Init.NSS = SPI_NSS_SOFT;
+hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+HAL_SPI_Init(&hspi1);
+
+Transmit/Receive
+// Transmit
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);  // CS low
+HAL_SPI_Transmit(&hspi1, txData, 3, 1000);
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);    // CS high
+
+// Receive
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+HAL_SPI_Receive(&hspi1, rxData, 10, 1000);
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+
+// Transmit and receive simultaneously
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+HAL_SPI_TransmitReceive(&hspi1, txBuf, rxBuf, 3, 1000);
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+
+ADC Functions
+Init & Configure
+ADC_HandleTypeDef hadc1;
+hadc1.Instance = ADC1;
+hadc1.Init.Resolution = ADC_RESOLUTION_12B;  // 0-4095
+hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+HAL_ADC_Init(&hadc1);
+
+ADC_ChannelConfTypeDef sConfig = {0};
+sConfig.Channel = ADC_CHANNEL_0;
+sConfig.Rank = 1;
+HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+
+Read Value
+HAL_ADC_Start(&hadc1);
+HAL_ADC_PollForConversion(&hadc1, 100);
+uint32_t adcValue = HAL_ADC_GetValue(&hadc1);
+HAL_ADC_Stop(&hadc1);
+
+// Convert to voltage (3.3V ref, 12-bit)
+float voltage = (adcValue / 4095.0) * 3.3;
+
+Timer Functions
+Basic Timer
+TIM_HandleTypeDef htim2;
+htim2.Instance = TIM2;
+htim2.Init.Prescaler = 8399;
+htim2.Init.Period = 9999;
+htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+HAL_TIM_Base_Init(&htim2);
+
+HAL_TIM_Base_Start(&htim2);        // Start
+HAL_TIM_Base_Start_IT(&htim2);     // Start with interrupt
+
+// Callback on overflow
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM2) {
+        // Timer overflow
+    }
+}
+
+Common Patterns
+Return Values
+HAL_OK       // Success
+HAL_ERROR    // Error
+HAL_BUSY     // Peripheral busy
+HAL_TIMEOUT  // Timeout
+
+if (HAL_I2C_Master_Transmit(...) != HAL_OK) {
+    // Handle error
+}
+
+Delays & Timing
+HAL_Delay(1000);  // Wait 1 second
+
+uint32_t now = HAL_GetTick();  // Get current milliseconds
+
+// Timeout pattern
+uint32_t start = HAL_GetTick();
+while (condition) {
+    if ((HAL_GetTick() - start) > 5000) {
+        break;  // 5 second timeout
+    }
+}
+
+Data Types
+uint8_t  var = 255;        // 0-255
+int8_t   var = -128;       // -128 to 127
+uint16_t var = 65535;      // 0-65535
+uint32_t var = 4294967295; // 0-4,294,967,295
+float    var = 3.14;       // 32-bit floating point
+bool     var = true;       // true/false
+
+Control Structures
+// If/else
+if (temp > 30) {
+    fan_on();
+} else if (temp > 20) {
+    fan_slow();
+} else {
+    fan_off();
+}
+
+// Switch
+switch (mode) {
+    case 0:
+        normalMode();
+        break;
+    case 1:
+        fastMode();
+        break;
+    default:
+        errorMode();
+        break;
+}
+
+// For loop
+for (int i = 0; i < 10; i++) {
+    readings[i] = analogRead(A0);
+}
+
+// While loop
+while (!sensor.isReady()) {
+    HAL_Delay(10);
+}
+
+Bitwise Operations
+uint8_t status = 0b10110100;
+
+status & 0b00001111;  // AND - mask bits
+status | 0b00000001;  // OR - set bits
+status ^ 0b11111111;  // XOR - flip bits
+~status;              // NOT - invert all bits
+status << 2;          // Left shift
+status >> 2;          // Right shift
+
+// Common patterns
+status |= (1 << 3);   // Set bit 3
+status &= ~(1 << 3);  // Clear bit 3
+status ^= (1 << 3);   // Toggle bit 3
+if (status & (1 << 3)) { /* check if bit 3 is set */ }
+
 
