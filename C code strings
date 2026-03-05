@@ -1,0 +1,209 @@
+# ================================================================
+C — STRINGS & TEXT CHEAT SHEET
+
+-----
+
+## ESSENTIAL INCLUDES
+
+#include <string.h>   // strlen, strcpy, strcat, strcmp, etc.
+#include <stdio.h>    // printf, scanf, sprintf, fprintf, sscanf
+#include <stdlib.h>   // atoi, atof, atol, malloc, free
+#include <ctype.h>    // isalpha, isdigit, isspace, toupper, tolower
+#include <stdint.h>   // uint8_t, int32_t, etc.
+#include <stdbool.h>  // bool, true, false (C99+)
+
+-----
+
+## DECLARING STRINGS
+
+const char *msg = “Hello, world!”;   // read-only literal
+char buf[64] = “Hello”;              // mutable array
+char buf[128]; buf[0] = ‘\0’;        // empty buffer — always init!
+char s[] = {‘H’,‘i’,’\0’};           // char-by-char (same as “Hi”)
+
+-----
+
+## PRINTF / SERIAL PRINTING
+
+printf(”%s\n”, msg);                 // print string
+printf(”%d %f %c\n”, i, f, c);      // int, float, char
+printf(“0x%02X %u %ld\n”, x, u, l); // hex, unsigned, long
+printf(”%8d | %-8d\n”, a, b);       // right-align / left-align
+
+// Write formatted string into a buffer
+char buf[64];
+snprintf(buf, sizeof(buf), “Val: %d”, val);
+
+fprintf(stderr, “Error: %s\n”, msg); // print to stderr
+sscanf(buf, “%d %f”, &i, &f);        // parse from string
+
+-----
+
+## FORMAT SPECIFIERS
+
+%s    // char*  string
+%c    // char   single character
+%d    // int    signed decimal
+%u    // uint   unsigned decimal
+%ld   // long
+%lu   // unsigned long
+%f    // float (or double)
+%.2f  // float, 2 decimal places
+%x    // hex lowercase
+%X    // hex uppercase
+%02X  // hex zero-padded 2 wide
+%p    // pointer address
+%%    // literal %
+
+-----
+
+## LENGTH & INSPECTION
+
+size_t len = strlen(s);              // excludes null terminator
+
+if (strcmp(a, b) == 0) { }          // 0 = equal, <0 / >0 otherwise
+strncmp(a, b, 5);                    // compare first 5 chars
+strcasecmp(a, b);                    // case-insensitive (POSIX)
+
+isalpha(c);   // a-z A-Z
+isdigit(c);   // 0-9
+isspace(c);   // space \t \n
+isalnum(c);   // alpha or digit
+ispunct(c);   // punctuation
+
+-----
+
+## COPYING & CONCATENATION
+
+strcpy(dst, src);                    // copy — dst must be big enough!
+
+// Safe copy — always prefer this
+strncpy(dst, src, sizeof(dst) - 1);
+dst[sizeof(dst) - 1] = ‘\0’;
+
+strcat(dst, src);                    // append src onto dst
+
+// Safe append
+strncat(dst, src, sizeof(dst) - strlen(dst) - 1);
+
+memcpy(dst, src, 16);               // copy raw memory
+memset(buf, 0, sizeof(buf));        // zero out buffer
+memset(buf, ‘A’, 10);              // fill with value
+
+-----
+
+## CASE CONVERSION
+
+char u = toupper(‘a’);   // ‘A’
+char l = tolower(‘Z’);   // ‘z’
+
+// Convert whole string to uppercase in-place
+for (int i = 0; s[i]; i++)
+s[i] = toupper((unsigned char)s[i]);
+
+-----
+
+## SEARCHING & SPLITTING
+
+// Find first char (returns pointer or NULL)
+char *p = strchr(s, ‘/’);
+if (p) printf(“found at index %ld\n”, p - s);
+
+char *p = strrchr(s, ‘.’);           // find last occurrence
+
+char *p = strstr(haystack, “needle”); // find substring
+
+// Tokenise / split — modifies the string!
+char *tok = strtok(buf, “,”);
+while (tok != NULL) {
+printf(”%s\n”, tok);
+tok = strtok(NULL, “,”);
+}
+
+-----
+
+## TYPE CONVERSION
+
+int   i = atoi(“42”);
+float f = atof(“3.14”);
+long  l = atol(“100000”);
+
+// Safer: strtol with error detection
+char *end;
+long v = strtol(“123”, &end, 10);
+if (*end != ‘\0’) { /* bad parse */ }
+
+long h = strtol(“0xFF”, NULL, 16);  // parse hex string
+
+// int → string (safest way)
+char out[16];
+snprintf(out, sizeof(out), “%d”, 42);
+
+-----
+
+## COMMON PATTERNS
+
+// Check if string starts with prefix
+strncmp(s, “$GP”, 3) == 0
+
+// Check string is empty
+s[0] == ‘\0’
+strlen(s) == 0
+
+// Trim trailing newline (common after fgets)
+s[strcspn(s, “\r\n”)] = ‘\0’;
+
+// Read a line from stdin safely
+fgets(buf, sizeof(buf), stdin);
+
+// Append formatted text to existing buffer
+size_t n = strlen(buf);
+snprintf(buf + n, sizeof(buf) - n, “ %d more”, val);
+
+// Pointer walk through string
+for (char *p = s; *p; p++)
+putchar(*p);
+
+-----
+
+## ESCAPE SEQUENCES
+
+‘\n’    // newline (LF)
+‘\r’    // carriage return (CR)
+‘\t’    // horizontal tab
+‘\0’    // null terminator
+‘\’    // literal backslash
+‘'’    // single quote
+‘"’    // double quote
+‘\a’    // bell
+‘\b’    // backspace
+‘\xNN’  // hex byte  e.g. ‘\x1B’ = ESC
+
+-----
+
+## COMMON GOTCHAS
+
+// sizeof vs strlen — sizeof includes ‘\0’, strlen doesn’t
+char s[] = “Hi”;
+sizeof(s)   // → 3  (H i \0)
+strlen(s)   // → 2
+
+// sizeof on a pointer gives pointer size, NOT string length!
+char *p = “Hi”;
+sizeof(p)   // → 4 or 8 (pointer size!) ❌
+strlen(p)   // → 2                       ✓
+
+// Always leave room for ‘\0’
+char buf[5];
+strncpy(buf, src, 4);   // max 4 chars
+buf[4] = ‘\0’;           // force terminate
+
+// Cast to unsigned char for toupper/tolower (avoids UB)
+toupper((unsigned char)c);   // ✓ correct
+
+// strtok is NOT reentrant — use strtok_r for threads
+char *save;
+strtok_r(buf, “,”, &save);
+
+# ================================================================
+C99/C11  |  string.h  stdio.h  stdlib.h  ctype.h
