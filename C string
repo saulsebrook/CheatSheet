@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C Strings & Text Cheat Sheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+–bg:       #0d1117;
+–surface:  #161b22;
+–border:   #21262d;
+–green:    #3fb950;
+–blue:     #58a6ff;
+–orange:   #ffa657;
+–purple:   #d2a8ff;
+–red:      #ff7b72;
+–yellow:   #e3b341;
+–dim:      #8b949e;
+–text:     #c9d1d9;
+–bright:   #f0f6fc;
+}
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 13px;
+line-height: 1.6;
+padding: 32px 24px;
+min-height: 100vh;
+}
+
+header {
+border-bottom: 1px solid var(–border);
+padding-bottom: 20px;
+margin-bottom: 28px;
+display: flex;
+align-items: baseline;
+gap: 16px;
+flex-wrap: wrap;
+}
+
+header h1 {
+font-family: ‘Syne’, sans-serif;
+font-size: 26px;
+font-weight: 800;
+color: var(–bright);
+letter-spacing: -0.5px;
+}
+
+header .sub {
+color: var(–dim);
+font-size: 11px;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+
+.grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+gap: 16px;
+}
+
+.card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 8px;
+overflow: hidden;
+}
+
+.card-header {
+padding: 10px 16px;
+font-family: ‘Syne’, sans-serif;
+font-size: 11px;
+font-weight: 700;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+border-bottom: 1px solid var(–border);
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.card-header .dot {
+width: 8px; height: 8px;
+border-radius: 50%;
+flex-shrink: 0;
+}
+
+.card-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+.entry { display: flex; flex-direction: column; gap: 3px; }
+
+.entry .comment {
+color: var(–dim);
+font-size: 11px;
+}
+
+.entry .comment::before { content: “// “; }
+
+code {
+display: block;
+white-space: pre;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 12.5px;
+line-height: 1.55;
+}
+
+.kw  { color: var(–red);    }
+.ty  { color: var(–blue);   }
+.fn  { color: var(–green);  }
+.str { color: var(–orange); }
+.cm  { color: var(–dim);    }
+.num { color: var(–purple); }
+.pp  { color: var(–yellow); }
+.op  { color: var(–text);   }
+
+.divider {
+border: none;
+border-top: 1px solid var(–border);
+margin: 4px 0;
+}
+
+.tag-includes { color: var(–yellow); }
+.tag-serial   { color: var(–green);  }
+.tag-create   { color: var(–blue);   }
+.tag-inspect  { color: var(–purple); }
+.tag-modify   { color: var(–orange); }
+.tag-search   { color: var(–red);    }
+.tag-convert  { color: var(–text);   }
+
+footer {
+margin-top: 28px;
+padding-top: 16px;
+border-top: 1px solid var(–border);
+color: var(–dim);
+font-size: 11px;
+letter-spacing: 0.06em;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <h1>C — Strings &amp; Text</h1>
+  <span class="sub">Cheat Sheet · Copy-Paste Ready</span>
+</header>
+
+<div class="grid">
+
+  <!-- INCLUDES -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--yellow)"></span><span class="tag-includes">Essential Includes</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">String functions (strlen, strcpy, strcat, strcmp, etc.)</span>
+        <code><span class="pp">#include</span> <span class="str">&lt;string.h&gt;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">printf, scanf, sprintf, fprintf, sscanf</span>
+        <code><span class="pp">#include</span> <span class="str">&lt;stdio.h&gt;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">atoi, atof, atol, malloc, free</span>
+        <code><span class="pp">#include</span> <span class="str">&lt;stdlib.h&gt;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">isalpha, isdigit, isspace, toupper, tolower</span>
+        <code><span class="pp">#include</span> <span class="str">&lt;ctype.h&gt;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">stdint fixed-width types (uint8_t, int32_t, etc.)</span>
+        <code><span class="pp">#include</span> <span class="str">&lt;stdint.h&gt;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">bool, true, false (C99+)</span>
+        <code><span class="pp">#include</span> <span class="str">&lt;stdbool.h&gt;</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECLARING STRINGS -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--blue)"></span><span class="tag-create">Declaring Strings</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">String literal — read-only, stored in flash/rodata</span>
+        <code><span class="kw">const</span> <span class="ty">char</span> <span class="op">*</span>msg <span class="op">=</span> <span class="str">"Hello, world!"</span><span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Char array — mutable, null-terminated</span>
+        <code><span class="ty">char</span> buf[<span class="num">64</span>] <span class="op">=</span> <span class="str">"Hello"</span><span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Empty buffer for building strings into</span>
+        <code><span class="ty">char</span> buf[<span class="num">128</span>]<span class="op">;</span>
+buf[<span class="num">0</span>] <span class="op">=</span> <span class="str">'\0'</span><span class="op">;</span>  <span class="cm">// always init!</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Char-by-char literal (same as "Hi")</span>
+        <code><span class="ty">char</span> s[] <span class="op">=</span> {<span class="str">'H'</span>,<span class="str">'i'</span>,<span class="str">'\0'</span>}<span class="op">;</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINTF / SERIAL PRINTING -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--green)"></span><span class="tag-serial">printf / Serial Printing</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">Print a string</span>
+        <code><span class="fn">printf</span>(<span class="str">"%s\n"</span>, msg)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Print integer, float, char</span>
+        <code><span class="fn">printf</span>(<span class="str">"%d %f %c\n"</span>, i, f, c)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Hex, unsigned, long</span>
+        <code><span class="fn">printf</span>(<span class="str">"0x%02X %u %ld\n"</span>, x, u, l)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Pad/align — right-align 8 wide, left-align</span>
+        <code><span class="fn">printf</span>(<span class="str">"%8d | %-8d\n"</span>, a, b)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Write formatted string to a buffer (like sprintf)</span>
+        <code><span class="ty">char</span> buf[<span class="num">64</span>]<span class="op">;</span>
+<span class="fn">snprintf</span>(buf, <span class="kw">sizeof</span>(buf),
+         <span class="str">"Val: %d"</span>, val)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Print to stderr</span>
+        <code><span class="fn">fprintf</span>(stderr, <span class="str">"Error: %s\n"</span>, msg)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Parse formatted input from a string</span>
+        <code><span class="fn">sscanf</span>(buf, <span class="str">"%d %f"</span>, <span class="op">&amp;</span>i, <span class="op">&amp;</span>f)<span class="op">;</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMAT SPECIFIERS -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--green)"></span><span class="tag-serial">Format Specifiers Quick Ref</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <code><span class="str">%s</span>   <span class="cm">// char*  string</span>
+<span class="str">%c</span>   <span class="cm">// char   single character</span>
+<span class="str">%d</span>   <span class="cm">// int    signed decimal</span>
+<span class="str">%u</span>   <span class="cm">// uint   unsigned decimal</span>
+<span class="str">%ld</span>  <span class="cm">// long</span>
+<span class="str">%lu</span>  <span class="cm">// unsigned long</span>
+<span class="str">%f</span>   <span class="cm">// float  (or double)</span>
+<span class="str">%.2f</span> <span class="cm">// float  2 decimal places</span>
+<span class="str">%x</span>   <span class="cm">// hex    lowercase</span>
+<span class="str">%X</span>   <span class="cm">// hex    uppercase</span>
+<span class="str">%02X</span> <span class="cm">// hex    zero-padded 2 wide</span>
+<span class="str">%p</span>   <span class="cm">// pointer address</span>
+<span class="str">%%</span>   <span class="cm">// literal %</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- STRING LENGTH & INSPECTION -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--purple)"></span><span class="tag-inspect">Length &amp; Inspection</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">Length — excludes null terminator</span>
+        <code><span class="ty">size_t</span> len <span class="op">=</span> <span class="fn">strlen</span>(s)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Compare — 0 if equal, &lt;0 / &gt;0 otherwise</span>
+        <code><span class="kw">if</span> (<span class="fn">strcmp</span>(a, b) <span class="op">==</span> <span class="num">0</span>) { <span class="cm">/* equal */</span> }</code>
+      </div>
+      <div class="entry">
+        <span class="comment">Compare first n chars</span>
+        <code><span class="fn">strncmp</span>(a, b, <span class="num">5</span>)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Case-insensitive compare (POSIX)</span>
+        <code><span class="fn">strcasecmp</span>(a, b)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Check individual chars</span>
+        <code><span class="fn">isalpha</span>(c)<span class="op">;</span>  <span class="cm">// a-z A-Z</span>
+<span class="fn">isdigit</span>(c)<span class="op">;</span>  <span class="cm">// 0-9</span>
+<span class="fn">isspace</span>(c)<span class="op">;</span>  <span class="cm">// space \t \n</span>
+<span class="fn">isalnum</span>(c)<span class="op">;</span>  <span class="cm">// alpha or digit</span>
+<span class="fn">ispunct</span>(c)<span class="op">;</span>  <span class="cm">// punctuation</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- STRING MODIFICATION -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--orange)"></span><span class="tag-modify">Copying &amp; Concatenation</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">Copy src → dst (dst must be large enough!)</span>
+        <code><span class="fn">strcpy</span>(dst, src)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Safe copy — at most n bytes, always prefer this</span>
+        <code><span class="fn">strncpy</span>(dst, src, <span class="kw">sizeof</span>(dst) <span class="op">-</span> <span class="num">1</span>)<span class="op">;</span>
+dst[<span class="kw">sizeof</span>(dst) <span class="op">-</span> <span class="num">1</span>] <span class="op">=</span> <span class="str">'\0'</span><span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Append src onto end of dst</span>
+        <code><span class="fn">strcat</span>(dst, src)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Safe append — at most n bytes total</span>
+        <code><span class="fn">strncat</span>(dst, src, <span class="kw">sizeof</span>(dst) <span class="op">-</span> <span class="fn">strlen</span>(dst) <span class="op">-</span> <span class="num">1</span>)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Copy raw memory (use for non-strings too)</span>
+        <code><span class="fn">memcpy</span>(dst, src, <span class="num">16</span>)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Zero-out a buffer</span>
+        <code><span class="fn">memset</span>(buf, <span class="num">0</span>, <span class="kw">sizeof</span>(buf))<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Fill buffer with a value</span>
+        <code><span class="fn">memset</span>(buf, <span class="str">'A'</span>, <span class="num">10</span>)<span class="op">;</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- CASE CONVERSION -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--orange)"></span><span class="tag-modify">Case Conversion</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">Single char to upper/lower</span>
+        <code><span class="ty">char</span> u <span class="op">=</span> <span class="fn">toupper</span>(<span class="str">'a'</span>)<span class="op">;</span>  <span class="cm">// 'A'</span>
+<span class="ty">char</span> l <span class="op">=</span> <span class="fn">tolower</span>(<span class="str">'Z'</span>)<span class="op">;</span>  <span class="cm">// 'z'</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Convert entire string to uppercase in-place</span>
+        <code><span class="kw">for</span> (<span class="ty">int</span> i <span class="op">=</span> <span class="num">0</span><span class="op">;</span> s[i]<span class="op">;</span> i<span class="op">++</span>)
+    s[i] <span class="op">=</span> <span class="fn">toupper</span>((unsigned char)s[i])<span class="op">;</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCHING -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--red)"></span><span class="tag-search">Searching &amp; Splitting</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">Find first occurrence of char (returns pointer or NULL)</span>
+        <code><span class="ty">char</span> <span class="op">*</span>p <span class="op">=</span> <span class="fn">strchr</span>(s, <span class="str">'/'</span>)<span class="op">;</span>
+<span class="kw">if</span> (p) <span class="fn">printf</span>(<span class="str">"found at index %ld\n"</span>, p <span class="op">-</span> s)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Find last occurrence of char</span>
+        <code><span class="ty">char</span> <span class="op">*</span>p <span class="op">=</span> <span class="fn">strrchr</span>(s, <span class="str">'.'</span>)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Find substring (returns pointer or NULL)</span>
+        <code><span class="ty">char</span> <span class="op">*</span>p <span class="op">=</span> <span class="fn">strstr</span>(haystack, <span class="str">"needle"</span>)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Tokenise / split by delimiter — modifies string!</span>
+        <code><span class="ty">char</span> <span class="op">*</span>tok <span class="op">=</span> <span class="fn">strtok</span>(buf, <span class="str">","</span>)<span class="op">;</span>
+<span class="kw">while</span> (tok <span class="op">!=</span> NULL) {
+    <span class="fn">printf</span>(<span class="str">"%s\n"</span>, tok)<span class="op">;</span>
+    tok <span class="op">=</span> <span class="fn">strtok</span>(NULL, <span class="str">","</span>)<span class="op">;</span>
+}</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERSION -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--text)"></span><span class="tag-convert">Type Conversion</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">String → int / float / long</span>
+        <code><span class="ty">int</span>   i <span class="op">=</span> <span class="fn">atoi</span>(<span class="str">"42"</span>)<span class="op">;</span>
+<span class="ty">float</span> f <span class="op">=</span> <span class="fn">atof</span>(<span class="str">"3.14"</span>)<span class="op">;</span>
+<span class="ty">long</span>  l <span class="op">=</span> <span class="fn">atol</span>(<span class="str">"100000"</span>)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Safer: strtol with error detection (base 10)</span>
+        <code><span class="ty">char</span> <span class="op">*</span>end<span class="op">;</span>
+<span class="ty">long</span> v <span class="op">=</span> <span class="fn">strtol</span>(<span class="str">"123"</span>, <span class="op">&amp;</span>end, <span class="num">10</span>)<span class="op">;</span>
+<span class="kw">if</span> (<span class="op">*</span>end <span class="op">!=</span> <span class="str">'\0'</span>) { <span class="cm">/* bad parse */</span> }</code>
+      </div>
+      <div class="entry">
+        <span class="comment">Parse hex string</span>
+        <code><span class="ty">long</span> h <span class="op">=</span> <span class="fn">strtol</span>(<span class="str">"0xFF"</span>, NULL, <span class="num">16</span>)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">int → string via snprintf (safest way)</span>
+        <code><span class="ty">char</span> out[<span class="num">16</span>]<span class="op">;</span>
+<span class="fn">snprintf</span>(out, <span class="kw">sizeof</span>(out), <span class="str">"%d"</span>, <span class="num">42</span>)<span class="op">;</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMON PATTERNS -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--blue)"></span><span class="tag-create">Common Patterns</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">Check if string starts with prefix</span>
+        <code><span class="fn">strncmp</span>(s, <span class="str">"$GP"</span>, <span class="num">3</span>) <span class="op">==</span> <span class="num">0</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Check string is empty</span>
+        <code>s[<span class="num">0</span>] <span class="op">==</span> <span class="str">'\0'</span>
+<span class="cm">// or:</span>  <span class="fn">strlen</span>(s) <span class="op">==</span> <span class="num">0</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Trim trailing newline (common after fgets)</span>
+        <code>s[<span class="fn">strcspn</span>(s, <span class="str">"\r\n"</span>)] <span class="op">=</span> <span class="str">'\0'</span><span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Read a line from stdin safely</span>
+        <code><span class="fn">fgets</span>(buf, <span class="kw">sizeof</span>(buf), stdin)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Append formatted text to existing buffer</span>
+        <code><span class="ty">size_t</span> n <span class="op">=</span> <span class="fn">strlen</span>(buf)<span class="op">;</span>
+<span class="fn">snprintf</span>(buf <span class="op">+</span> n, <span class="kw">sizeof</span>(buf) <span class="op">-</span> n,
+         <span class="str">" %d more"</span>, val)<span class="op">;</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Pointer walk through string</span>
+        <code><span class="kw">for</span> (<span class="ty">char</span> <span class="op">*</span>p <span class="op">=</span> s<span class="op">;</span> <span class="op">*</span>p<span class="op">;</span> p<span class="op">++</span>)
+    <span class="fn">putchar</span>(<span class="op">*</span>p)<span class="op">;</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESCAPE SEQUENCES -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--purple)"></span><span class="tag-inspect">Escape Sequences</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <code><span class="str">'\n'</span>   <span class="cm">// newline        (LF)</span>
+<span class="str">'\r'</span>   <span class="cm">// carriage return (CR)</span>
+<span class="str">'\t'</span>   <span class="cm">// horizontal tab</span>
+<span class="str">'\0'</span>   <span class="cm">// null terminator</span>
+<span class="str">'\\'</span>   <span class="cm">// literal backslash</span>
+<span class="str">'\''</span>   <span class="cm">// single quote</span>
+<span class="str">'\"'</span>   <span class="cm">// double quote</span>
+<span class="str">'\a'</span>   <span class="cm">// bell</span>
+<span class="str">'\b'</span>   <span class="cm">// backspace</span>
+<span class="str">'\xNN'</span> <span class="cm">// hex byte  e.g. '\x1B' = ESC</span></code>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOTCHAS -->
+
+  <div class="card">
+    <div class="card-header"><span class="dot" style="background:var(--red)"></span><span class="tag-search">⚠ Common Gotchas</span></div>
+    <div class="card-body">
+      <div class="entry">
+        <span class="comment">sizeof vs strlen — sizeof includes '\0', strlen doesn't</span>
+        <code><span class="ty">char</span> s[] <span class="op">=</span> <span class="str">"Hi"</span><span class="op">;</span>
+<span class="fn">sizeof</span>(s)  <span class="cm">// → 3  (H i \0)</span>
+<span class="fn">strlen</span>(s)  <span class="cm">// → 2</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">sizeof on pointer gives pointer size, NOT string length!</span>
+        <code><span class="ty">char</span> <span class="op">*</span>p <span class="op">=</span> <span class="str">"Hi"</span><span class="op">;</span>
+<span class="fn">sizeof</span>(p)  <span class="cm">// → 4 or 8 (ptr size!) ❌</span>
+<span class="fn">strlen</span>(p)  <span class="cm">// → 2              ✓</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">Always leave room for '\0' in buffers</span>
+        <code><span class="ty">char</span> buf[<span class="num">5</span>]<span class="op">;</span>
+<span class="fn">strncpy</span>(buf, src, <span class="num">4</span>)<span class="op">;</span>   <span class="cm">// max 4 chars</span>
+buf[<span class="num">4</span>] <span class="op">=</span> <span class="str">'\0'</span><span class="op">;</span>           <span class="cm">// force terminate</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">toupper/tolower needs cast to avoid UB on signed char</span>
+        <code><span class="fn">toupper</span>((unsigned char)c)<span class="op">;</span>  <span class="cm">// ✓ correct</span></code>
+      </div>
+      <div class="entry">
+        <span class="comment">strtok is NOT reentrant — use strtok_r for threads</span>
+        <code><span class="ty">char</span> <span class="op">*</span>save<span class="op">;</span>
+<span class="fn">strtok_r</span>(buf, <span class="str">","</span>, <span class="op">&amp;</span>save)<span class="op">;</span></code>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>C99/C11 · string.h · stdio.h · stdlib.h · ctype.h</footer>
+
+</body>
+</html>
