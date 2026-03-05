@@ -1,0 +1,24 @@
+Github
+
+Create a new repository on the command line
+
+echo "# PythonWebScraping" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/saulsebrook/PythonWebScraping.git
+git push -u origin master
+
+Push an existing repository from the command line
+
+git remote add origin https://github.com/saulsebrook/PythonWebScraping.git
+git push -u origin master
+
+To update repository
+
+git add
+	git add * / or git add --update (if files deleted)
+git commit
+	git commit -m “Comment”
+git push
+	git push -u origin main
