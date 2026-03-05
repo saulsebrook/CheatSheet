@@ -1,0 +1,337 @@
+# ================================================================
+C — NUMBERS & HEX CHEAT SHEET
+
+-----
+
+## ESSENTIAL INCLUDES
+
+#include <stdint.h>   // fixed-width types: uint8_t, int32_t, etc.
+#include <stdio.h>    // printf, scanf, snprintf
+#include <stdlib.h>   // atoi, atof, strtol, strtoul, abs
+#include <math.h>     // floor, ceil, round, sqrt, pow, fabs
+// compile with: -lm
+#include <limits.h>   // INT_MAX, INT_MIN, UINT_MAX, etc.
+#include <float.h>    // FLT_MAX, DBL_MAX, FLT_EPSILON, etc.
+#include <stdint.h>   // UINT8_MAX, INT32_MIN, etc.
+
+-----
+
+## INTEGER TYPES
+
+// Platform-dependent (avoid for portability)
+char        c;    // 1 byte, -128 to 127
+short       s;    // 2 bytes
+int         i;    // usually 4 bytes
+long        l;    // 4 or 8 bytes (platform)
+long long   ll;   // 8 bytes
+
+// Fixed-width — prefer these in embedded!
+uint8_t   u8;    //  8-bit unsigned  0 to 255
+int8_t    i8;    //  8-bit signed   -128 to 127
+uint16_t  u16;   // 16-bit unsigned  0 to 65535
+int16_t   i16;   // 16-bit signed   -32768 to 32767
+uint32_t  u32;   // 32-bit unsigned  0 to 4294967295
+int32_t   i32;   // 32-bit signed   -2147483648 to 2147483647
+uint64_t  u64;   // 64-bit unsigned
+int64_t   i64;   // 64-bit signed
+
+// Size type — use for array indices, sizeof results
+size_t    n;     // unsigned, platform-width
+
+-----
+
+## FLOAT TYPES
+
+float       f;   // 32-bit, ~7 significant digits
+double      d;   // 64-bit, ~15 significant digits
+long double ld;  // 80 or 128-bit (platform)
+
+// Literal suffixes
+float  f = 3.14f;    // f suffix = float
+double d = 3.14;     // no suffix = double
+
+-----
+
+## INTEGER LITERALS
+
+int dec  = 255;       // decimal
+int oct  = 0377;      // octal  (0 prefix)
+int hex  = 0xFF;      // hex    (0x prefix)
+int bin  = 0b11111111; // binary (GCC extension, C23 standard)
+
+// Unsigned / long suffixes
+unsigned int  u  = 255U;
+long          l  = 100000L;
+unsigned long ul = 100000UL;
+long long     ll = 1000000000LL;
+
+// Readable with ’ separator (C23 / GCC extension)
+uint32_t x = 0xFF’FF’FF’FFU;
+int big    = 1’000’000;
+
+-----
+
+## HEX LITERALS & NOTATION
+
+0xFF          // 255
+0x00          // 0
+0xDEADBEEF    // common debug sentinel
+0x80000000    // MSB set on 32-bit
+
+// Hex per byte — useful for register masks
+uint8_t  STATUS_REG = 0xA5;
+uint32_t MASK       = 0x0000FF00;  // byte 1
+
+// Bitfield masks
+#define BIT(n)     (1U << (n))
+#define BIT0       0x01
+#define BIT1       0x02
+#define BIT2       0x04
+#define BIT3       0x08
+#define BIT4       0x10
+#define BIT5       0x20
+#define BIT6       0x40
+#define BIT7       0x80
+
+-----
+
+## PRINTING NUMBERS
+
+printf(”%d\n”,   i);          // signed decimal
+printf(”%u\n”,   u);          // unsigned decimal
+printf(”%ld\n”,  l);          // long
+printf(”%lld\n”, ll);         // long long
+printf(”%f\n”,   f);          // float/double
+printf(”%.2f\n”, f);          // 2 decimal places
+printf(”%e\n”,   f);          // scientific: 3.140000e+00
+printf(”%g\n”,   f);          // shorter of %f or %e
+
+// Hex
+printf(”%x\n”,   i);          // hex lowercase: ff
+printf(”%X\n”,   i);          // hex uppercase: FF
+printf(“0x%X\n”, i);          // with prefix:   0xFF
+printf(”%08X\n”, i);          // zero-padded 8 wide: 000000FF
+printf(”%02X\n”, byte);       // byte as 2 hex digits: 0A
+
+// Fixed-width types need special macros from <inttypes.h>
+#include <inttypes.h>
+printf(”%” PRIu32 “\n”, u32); // correct for uint32_t
+printf(”%” PRId64 “\n”, i64); // correct for int64_t
+printf(”%” PRIx32 “\n”, u32); // hex for uint32_t
+
+// Print raw bytes as hex (e.g. dump a buffer)
+for (int i = 0; i < len; i++)
+printf(”%02X “, buf[i]);
+printf(”\n”);
+
+-----
+
+## SCANNING / PARSING NUMBERS
+
+// From stdin
+scanf(”%d”,  &i);
+scanf(”%u”,  &u);
+scanf(”%f”,  &f);
+scanf(”%lf”, &d);             // double needs %lf with scanf!
+scanf(”%x”,  &i);             // parse hex input
+
+// From a string
+sscanf(buf, “%d %f”, &i, &f);
+sscanf(buf, “0x%X”,  &hex_val);
+
+// strtol — safest integer parse (base 10)
+char *end;
+long v = strtol(str, &end, 10);
+if (*end != ‘\0’) { /* parse error */ }
+
+// strtoul — unsigned
+unsigned long u = strtoul(str, &end, 10);
+
+// strtol for hex (base 16)
+long h = strtol(“0xFF”, NULL, 16);  // → 255
+long h = strtol(“FF”,   NULL, 16);  // → 255 (no prefix needed)
+
+// strtod — double from string
+double d = strtod(“3.14159”, NULL);
+
+// Quick and dirty (no error checking)
+int   i = atoi(“42”);
+float f = atof(“3.14”);
+long  l = atol(“100000”);
+
+-----
+
+## ARITHMETIC & OPERATORS
+
+- - - /  %          // add, sub, mul, div, modulo
+      i / j                  // integer division — truncates toward zero
+      i % j                  // remainder (same sign as dividend in C)
+      -i                     // negate
+
+// Integer division examples
+7 / 2   → 3            // truncates
+7 % 2   → 1
+-7 / 2  → -3           // truncates toward zero (C99+)
+-7 % 2  → -1
+
+// Float division
+(float)i / j           // cast to avoid integer division
+7.0f / 2               // → 3.5
+
+// Increment / decrement
+i++;  ++i;
+i–;  –i;
+
+// Compound assignment
+i += 5;  i -= 3;  i *= 2;  i /= 4;  i %= 3;
+
+-----
+
+## BITWISE OPERATIONS
+
+a & b       // AND
+a | b       // OR
+a ^ b       // XOR
+~a          // NOT (bitwise complement)
+a << n      // left shift  (multiply by 2^n)
+a >> n      // right shift (divide by 2^n, logical for unsigned)
+
+// Common patterns
+x |=  (1U << 3);   // SET   bit 3
+x &= ~(1U << 3);   // CLEAR bit 3
+x ^=  (1U << 3);   // TOGGLE bit 3
+(x >> 3) & 1       // READ  bit 3 (0 or 1)
+
+// Extract a byte from a word
+uint8_t  lo = (val)       & 0xFF;  // low byte
+uint8_t  hi = (val >> 8)  & 0xFF;  // high byte
+uint8_t  b2 = (val >> 16) & 0xFF;  // byte 2
+uint8_t  b3 = (val >> 24) & 0xFF;  // byte 3
+
+// Pack two bytes into a uint16
+uint16_t word = ((uint16_t)hi << 8) | lo;
+
+// Pack four bytes into a uint32
+uint32_t w = ((uint32_t)b3 << 24) | ((uint32_t)b2 << 16)
+| ((uint32_t)hi << 8)  |  (uint32_t)lo;
+
+// Check if value is power of 2
+(n > 0) && ((n & (n - 1)) == 0)
+
+// Round up to next multiple of 4
+(n + 3) & ~3
+
+-----
+
+## MATH FUNCTIONS  (math.h, link with -lm)
+
+fabs(x)         // absolute value (float)
+abs(i)          // absolute value (int) — from stdlib.h
+floor(x)        // round down
+ceil(x)         // round up
+round(x)        // round to nearest
+sqrt(x)         // square root
+pow(x, y)       // x to the power y
+fmod(x, y)      // float modulo
+log(x)          // natural log
+log10(x)        // log base 10
+sin(x)          // trig (radians)
+cos(x)
+tan(x)
+
+// Clamp a value
+#define CLAMP(x, lo, hi)  ((x) < (lo) ? (lo) : (x) > (hi) ? (hi) : (x))
+int v = CLAMP(raw, 0, 255);
+
+// Min / Max
+#define MAX(a, b)  ((a) > (b) ? (a) : (b))
+#define MIN(a, b)  ((a) < (b) ? (a) : (b))
+
+-----
+
+## TYPE LIMITS  (limits.h / stdint.h)
+
+INT_MAX        //  2147483647
+INT_MIN        // -2147483648
+UINT_MAX       //  4294967295
+LONG_MAX       //  platform dependent
+LLONG_MAX      //  9223372036854775807
+
+UINT8_MAX      //  255
+INT8_MIN       // -128
+UINT16_MAX     //  65535
+UINT32_MAX     //  4294967295
+UINT64_MAX     //  18446744073709551615
+
+FLT_MAX        //  ~3.4e38
+DBL_MAX        //  ~1.8e308
+FLT_EPSILON    //  ~1.19e-7  (smallest float difference from 1.0)
+DBL_EPSILON    //  ~2.22e-16
+
+-----
+
+## TYPE CASTING
+
+(int)f             // float to int — truncates toward zero
+(float)i           // int to float
+(uint8_t)i         // truncate to byte (wraps on overflow)
+(uint32_t)(int32_t)i  // sign-extend then zero-extend
+
+// Safe widening (always ok)
+uint8_t  b = 200;
+uint16_t w = b;    // implicit, fine
+
+// Narrowing — be explicit and aware of truncation
+uint32_t big = 0x1234;
+uint8_t  lo  = (uint8_t)big;   // → 0x34
+
+-----
+
+## OVERFLOW & WRAPPING
+
+// Unsigned wraps on overflow (defined behaviour)
+uint8_t x = 255; x++;   // → 0
+
+// Signed overflow is UNDEFINED BEHAVIOUR — avoid it!
+int8_t  y = 127; y++;   // ❌ undefined
+
+// Safe add with overflow check
+if (a > UINT32_MAX - b) { /* overflow! */ }
+
+// GCC built-in overflow detection
+if (__builtin_add_overflow(a, b, &result)) { /* overflow */ }
+if (__builtin_mul_overflow(a, b, &result)) { /* overflow */ }
+
+-----
+
+## COMMON GOTCHAS
+
+// Integer division truncates — cast first!
+int a = 7, b = 2;
+float r = a / b;         // ❌ → 3.0 (int division)
+float r = (float)a / b;  // ✓ → 3.5
+
+// Mixing signed and unsigned compares — unsigned wins!
+int      i = -1;
+uint32_t u = 0;
+if (i < u) { }   // ❌ false! -1 converts to huge uint
+
+// Float equality — never use ==
+if (f == 3.14f) { }                   // ❌ unreliable
+if (fabs(f - 3.14f) < 1e-6f) { }     // ✓ epsilon compare
+
+// Shift amount must be < bit width
+uint32_t x = 1U << 32;   // ❌ undefined behaviour
+uint64_t x = 1ULL << 32; // ✓ use wider type
+
+// % on negatives is implementation-defined before C99
+// In C99+ it truncates toward zero:
+-7 % 3  → -1   // not 2
+
+// Forgetting to use %lf for double in scanf
+double d;
+scanf(”%f”,  &d);   // ❌ reads as float, corrupts d
+scanf(”%lf”, &d);   // ✓
+
+# ================================================================
+C99/C11  |  stdint.h  stdio.h  stdlib.h  math.h  limits.h
