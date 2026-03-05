@@ -1,0 +1,318 @@
+SQL General Query Commands
+
+Show databases
+
+	SHOW DATABASES
+
+
+Show all tables 
+
+	SHOW TABLES
+
+
+Show columns from a certain table
+
+	SHOW COLUMNS FROM table_name
+
+
+View a table
+
+	SELECT * FROM table_name
+
+
+Update a value in a table 
+
+	UPDATE tablename
+	SET Column1 = value1,
+   		 Column2 = value2,
+  		  …
+    		Columnn = valuen
+	WHERE criteria
+
+	*Update using a function
+
+	UPDATE table_name
+	SET ColumnName = REPLACE(ColumnName, 'string_search_term', 'replacing_term')
+
+
+Insert a row in a table
+
+	INSERT INTO tablename
+      			(column1, column2, … columnn)
+      			VALUES (value1, value2, … valuen)
+Note: Text values are encapsulated in single quotes
+
+
+Delete from a table
+
+	DELETE FROM tablename
+	WHERE criteria e.g. ID = 1
+Note: If where clause ommited, all data from table will be deleted
+
+
+Create a table
+
+	CREATE TABLE table_name (
+   		ID int NOT NULL AUTO_INCREMENT,
+		LastName varchar(255) NOT NULL,
+    		FirstName varchar(255),
+		Age int,
+ 		PRIMARY KEY (ID))
+
+
+Add column to table
+
+	ALTER TABLE table_name ADD dateOfBirth date
+
+
+Rename column name
+
+	ALTER TABLE table_name
+	CHANGE column_name new_name varchar(100)
+
+
+Delete table
+
+	DROP TABLE table_name
+
+
+
+Get info from multiple tables
+
+	SELECT table_name.column_name, table_name2.column_name FROM table_name, 				table_name2
+
+
+
+Order output from SQL Command
+
+	SELECT * FROM table_name
+	ORDER BY e.g. LastName, Age
+
+
+Collating data from two tables using JOIN
+
+	SELECT table_name.ColumnName, table_name.ColumnName, table_name2.ColumnName, 		table_name2.ColumnName 
+	FROM table_name JOIN table_name2 ON table_name.Column1 = table_name2.Column1
+	WHERE table_name.ColumnName = ('String')
+	GROUP BY table_name.ColumnName
+
+
+Query when joining two tables where something is equal from THIRD table
+
+	SELECT Sales.SaleNo, Sales.SaleDate, SaleProducts.Quantity, SaleProducts.ProductID
+	FROM Sales JOIN SaleProducts ON Sales.SaleNo = SaleProducts.SaleNo
+	WHERE SaleProducts.ProductID IN (SELECT ProductID
+									FROM Products
+									WHERE BrandID = 1)
+
+
+
+
+SQL Mathematic Functions
+
+ABS()
+The ABS() function returns the absolute (positive) value of the specified numeric expression. The
+below SQL statement will return 1.0, 0.0 and 1.0.
+
+	SELECT ABS(-1.0), ABS(0.0), ABS(1.0)
+
+
+CEILING()
+The CEILING() function returns the smallest integer greater than, or equal to, the specified
+numeric expression. The below SQL statement will return 124, -123 and 0.
+
+	SELECT CEILING(123.45), CEILING(-123.45), CEILING(0.0)
+
+
+FLOOR()
+The FLOOR() function returns the largest integer less than or equal to the specified numeric
+expression. The below SQL statement will return 123, -124 and 0.
+
+	SELECT FLOOR(123.45), FLOOR(-123.45), FLOOR(0.0)
+
+
+ROUND()
+The ROUND(numeric_expression , length [ ,function ] ) function returns a numeric value, rounded
+to the specified length or precision. A function of zero rounds the number, whilst a function of 1
+truncates the number. The below SQL statement will return 123.9990 and 124.0000.
+
+	SELECT ROUND(123.9994, 3), ROUND(123.9995, 3)
+
+The below SQL statement will return 151.00 and 150.00.
+
+	SELECT ROUND(150.75, 0), ROUND(150.75, 0, 1)
+
+
+POWER()
+The POWER (float_expression , y ) function returns the value of the specified expression to the
+specified power. The below SQL statement will return 8.
+
+	SELECT POWER(2, 3)
+
+There are many other mathematical functions such as COS(), SIN(), TAN(), LOG(), PI(), RADIANS(),
+SIGN(), SQRT(), SQUARE() and others.
+
+
+
+SQL Date Functions
+
+GETDATE()
+The GETDATE() function returns the current date and time. The below SQL statement will return
+something like: 2016-06-08 10:43:48.827.
+
+	SELECT GETDATE()
+
+
+YEAR(), MONTH() and DAY()
+The YEAR(date), MONTH(date) and DAY(date) functions return the year, month and date of a
+supplied date. The below SQL statement will return something like 2016, 6 and 8.
+
+	SELECT YEAR(GETDATE()), MONTH(GETDATE()), DAY(GETDATE())
+
+
+DATEPART()
+The DATEPART(datepart, date) function returns an integer representing a datepart of a date. The
+following two SQL statements will return something like 2016.
+
+	SELECT DATEPART("Year", GETDATE())
+
+	SELECT DATEPART("yy", GETDATE())
+
+Note: that the date part is encapsulated in double quotes.
+
+
+Datepart Abbreviation
+	Year 			yy, yyyy
+	Quarter 		qq, q
+	Month 			mm, m
+	Dayofyear 		dy, y
+	Day 			dd, d
+	Week 			wk, ww
+	Weekday 		dw, w
+	Hour 			Hh
+	Minute 			mi, n
+	Millisecond 	Ms
+
+
+DATEADD()
+The DATEADD(datepart, number, date) function returns a new date/time value after adding a
+number that represents a date or time interval to the specified datepart. The number parameter
+must evaluate to an integer, and the date parameter must evaluate to a valid date. The below
+SQL statement adds one month to the date 08 Jun 2016 and will return 2016-07-08
+00:00:00.000:
+
+	SELECT DATEADD("Month", 1, '08 JUN 2016')
+
+The below SQL statement adds five days to the date 08 Jun 2016 and will return 2016-06-13
+00:00:00.000:
+
+	SELECT DATEADD("Day", 5, '08 JUN 2016')
+
+
+DATEDIFF()
+The DATEDIFF(datepart, startdate, endate) function returns the number of date and time
+boundaries crossed between two specified dates. The datepart parameter identifies which date
+and time boundaries are to be compared. The below SQL statement will return 60.
+
+	SELECT DATEDIFF("dd", '01 Feb 2016', '01 APR 2016')
+
+The DATEDIFF() function is a great function to calculate how long it has been since you lent your
+mate Bob 50 dollars which he has still not paid back.
+
+SQL String Functions
+
+LEN()
+The LEN() function returns length of string. The below SQL statement will return 10.
+
+	SELECT LEN('John Smith')
+
+
+LOWER()
+The LOWER() function converts all characters to lowercase characters. The below SQL statement
+will return john smith.
+
+	SELECT LOWER('JOHN SMITH')
+
+
+UPPER()
+The UPPER() function converts all characters to uppercase characters. The below SQL statement 
+will return JOHN SMITH.
+
+	SELECT UPPER('john smith')
+
+
+LTRIM()
+The LTRIM() function removes all spaces on the left of a given character string. The below SQL
+statement will return 'John Smith'.
+	
+	SELECT LTRIM(' John Smith')
+
+
+RTRIM()
+The RTRIM() function removes all spaces on the right of a given character string. The below SQL
+statement will return 'John Smith'.
+
+	SELECT RTRIM('John Smith  ')
+
+
+LTRIM() and RTRIM()
+Both the LTRIM() and RTRIM() functions do not remove tab or line feed characters. To remove all
+spaces from both the left and right of a given character string, use both of the LTRIM() and
+RTRIM() functions.
+
+	SELECT LTRIM(RTRIM('  John Smith  '))
+
+
+SUBSTRING()
+The SUBSTRING(character_expression, position, length) function returns a part of string from an
+original string. Position specifies where the substring begins and length specifies the length of
+the substring in terms of the number of characters. The below SQL statement will return 'Smit'.
+
+	SELECT SUBSTRING('John Smith', 6, 4)
+
+
+REPLACE()
+The REPLACE(character_expression, searchstring, replacementstring) function replaces a sub
+string within the original string. Searchstring is the string which you want to replace.
+Replacementstring is the new string which you want to replace it with. The below SQL statement
+will return John Jones.
+
+	SELECT REPLACE('John Smith', 'Smith', 'Jones')
+
+All instances of the seachstring will be replaced. The below SQL statement will return John Jones
+Jane Jones.
+
+	SELECT REPLACE('John Smith Jane Smith', 'Smith', 'Jones')
+
+
+LEFT()
+The LEFT(character_expression, length) function extracts a number of characters from the left
+side of a given string expression. The below SQL statement will return ‘John’.
+
+	SELECT LEFT('John Smith', 4)
+
+RIGHT()
+The RIGHT(character_expression, length) function extracts a number of characters from the right
+side of a given string expression. The below SQL statement will return ‘mith’.
+
+	SELECT RIGHT('John Smith', 4)
+
+
+CHARINDEX()
+The CHARINDEX (search_expression, character_expression, [, start_location ]) function returns
+the starting position, if found, of the search expression within the character expression. You can
+optionally specify a start location. The below SQL statement will return 6.
+
+	SELECT CHARINDEX('Smi', 'John Smith')
+
+The below SQL statement will return 12.
+
+	SELECT CHARINDEX('Smi', 'John Smith Smith', 7)
+
+
+
+
+
+
+
+
